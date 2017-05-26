@@ -1,24 +1,31 @@
+'use strict';
+
 // Enemies our player must avoid
 var firstPos = -10;
 var score = 0;
-var Enemy = function(x, y, speed) {
+
+class Character {
+  constructor(x,y,sprite){
+  this.x = x;
+  this.y = y;
+  this.sprite = sprite;
+}
+}
+
+class Enemy extends Character {
+  constructor(x,y,speed){
+    super(x,y,'images/enemy-bug.png');
+    this.speed = speed;
+  }
     // Variables applied to each of our instances go here,
     // we've provided one for you to get started
 
     // The image/sprite for our enemies, this uses
     // a helper we've provided to easily load images
-    this.sprite = 'images/enemy-bug.png';
-    this.x = x;
-    this.y = y;
-    this.speed = speed;
-};
-var enemy1 = new Enemy(-10,100,150);
-var enemy2 = new Enemy(-10, 150, 100);
-var enemy3 = new Enemy(-10, 125, 50);
 
 // Update the enemy's position, required method for game
 // Parameter: dt, a time delta between ticks
-Enemy.prototype.update = function(dt) {
+update(dt) {
     // You should multiply any movement by the dt parameter
     // which will ensure the game runs at the same speed for
     // all computers.
@@ -27,6 +34,7 @@ Enemy.prototype.update = function(dt) {
        if(player.y < (this.y + 70) && (player.y + 50) > this.y){
          $('h3').text("You Lost! Next game!");
          player.reset();
+         gem.reset();
     }}
     if(this.x > 500){
       this.reset();
@@ -34,23 +42,27 @@ Enemy.prototype.update = function(dt) {
 };
 
 // Draw the enemy on the screen, required method for game
-Enemy.prototype.render = function() {
+render() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
-Enemy.prototype.reset = function(){
+reset(){
   this.x = firstPos;
 }
+}
+let enemy1 = new Enemy(-10,100,150);
+let enemy2 = new Enemy(-10, 150, 100);
+let enemy3 = new Enemy(-10, 125, 50);
 
 // Now write your own player class
 // This class requires an update(), render() and
 // a handleInput() method.
-var Player = function(x,y) {
-  this.sprite = null;
-  this.x = x;
-  this.y = y;
-  this.score = 0;
-}
-Player.prototype.update = function(){
+class Player extends Character{
+  constructor(x,y){
+    super(x, y, null);
+    this.score = 0;
+  }
+
+update(){
   if (this.sprite === null){
     $('h2').text("Pick the player!");
   }
@@ -63,7 +75,7 @@ Player.prototype.update = function(){
     $('h2').text("Dodge the bugs!");
   }
 };
-Player.prototype.render = function(){
+render(){
   if(this.sprite != null){
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
   }
@@ -71,13 +83,13 @@ Player.prototype.render = function(){
     this.players();
 };
 //Draw the selection of players on screen
-Player.prototype.players = function(){
+players(){
  ctx.drawImage(Resources.get('images/char-boy.png'), 120, 350);
  ctx.drawImage(Resources.get('images/char-cat-girl.png'), 220, 350);
  ctx.drawImage(Resources.get('images/char-horn-girl.png'), 320, 350);
  }
  //Let user select one of the players
- Player.prototype.playerSelection = function(a, b){
+ playerSelection(a, b){
    var imageBoy = 'images/char-boy.png';
    var catGirl = 'images/char-cat-girl.png';
    var hornGirl = 'images/char-horn-girl.png';
@@ -94,7 +106,7 @@ Player.prototype.players = function(){
     }
 }
 //User moves the selected player in chosen direction
-Player.prototype.handleInput = function(keycode){
+handleInput(keycode){
     var moveX = 20;
     var moveY = 20;
     if ((keycode == "left") && (this.x > -10)){
@@ -111,16 +123,42 @@ Player.prototype.handleInput = function(keycode){
     }
 };
 //puts the player back in the original place
-Player.prototype.reset = function(){
+reset(){
   this.x = 200;
   this.y = 400;
 }
-
+}
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
 var allEnemies = [enemy1, enemy2, enemy3];
 // Place the player object in a variable called player
 var player = new Player(200,400);
+
+class Gems extends Character{
+  constructor(x,y,sprite){
+    super(x,y,sprite);
+    this.x = x;
+    this.y = y;
+    this.sprite = sprite;
+  }
+  render() {
+      ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+  };
+  update(){
+    if(player.x < (this.x + 60) && player.x > (this.x - 60)){
+       if(player.y < (this.y + 70) && (player.y + 50) > this.y){
+      this.x = -50;
+      this.y = -200;
+      player.score++;
+    }
+    }
+  };
+  reset(){
+    this.x = 150;
+    this.y = 150;
+  }
+}
+let gem = new Gems(150,150,'images/Rock.png');
 
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.
